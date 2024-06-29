@@ -1,5 +1,5 @@
-from rules import ClientRules
-
+from client.models.rules import ClientRules
+import logging
 
 class Chains:
     def __init__(self) -> None:
@@ -7,12 +7,10 @@ class Chains:
 
     @ClientRules()
     def append_chain(self, chain):
-        if chain[0] == "ok":
+        if chain[0]:
             self.chains.append(chain[1])
-            return True
         else:
-            print(f"{chain[0]}:{chain[1]}")
-            return False
+            logging.warning(f"The chain '{chain[1]}' was not append")
 
     def to_file(self):
         return self.chains
@@ -20,5 +18,3 @@ class Chains:
     def send(self):
         pass
 
-chains = Chains()
-chains.append_chain("asd sd q wqqqqwe qqq")
