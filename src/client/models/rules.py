@@ -1,5 +1,5 @@
-# import inspect
-# import logging
+import inspect
+import logging
 import re
 from utils.utils import in_range
 from models.rules import Rules
@@ -20,9 +20,25 @@ class ClientRules(Rules):
         self.len_spaces_range = len_spaces_range
         self.valid_characters = valid_characters
         self.len_chain_range = len_chain_range
+        self.not_rules = ["__call__", "__init__"]
+         
+    def __call__(self, func):
+        def wrapper(*args, **kwargs):
+            chains_self = args[0]
+            chain = args[1]
+            is_valid = True
 
-        not_rules = ["__call__", "__init__"]
-        super().__init__(rules_class=ClientRules, not_rules=not_rules)
+            rules = inspect.getmembers(ClientRules, predicate=inspect.isfunction)
+            for rule_name, rule in rules:
+                if rule_name not in self.not_rules:
+                    try:
+                        rule(self, chain)
+                    except Exception as e:
+                        logging.error(f"{type(e).__name__}: {e} Chain: '{chain}'.")
+                        is_valid = False
+
+            return func(self=chains_self, chain=(is_valid, chain))
+        return wrapper
 
     def end_init_spaces_rule(self, chain):
         if chain[:1] == " " or chain[-1:] == " ":
