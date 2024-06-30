@@ -5,7 +5,6 @@ import random
 import time
 from tqdm import tqdm
 
-
 class ChainGenerate:
     def random_numbers_and_letters_chain():
         chain_len = random.randint(
