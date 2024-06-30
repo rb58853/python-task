@@ -1,6 +1,3 @@
-from models.chain import Chains
-from config.config import ClientConfig
+from api.client import Client
 
-chains = Chains()
-chains.generate_n_chains(10000)
-file = chains.to_file()
+Client().start()

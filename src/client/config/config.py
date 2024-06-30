@@ -20,3 +20,5 @@ class ChainsConfig:
 
 class ClientConfig:
     BASE_DATA_PATH = os.path.sep.join([os.getcwd(), "data", "client", "chains"])
+    DIR = '127.0.0.1'
+    PORT = '8080'
