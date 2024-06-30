@@ -2,11 +2,10 @@ import inspect
 import logging
 import re
 from utils.utils import in_range
-from models.rules import Rules
 from client.config.config import ClientConfig
 
 
-class ClientRules(Rules):
+class ClientRules:
     """
     ### Rules:
         - `spaces_rule:` Esta regla esta definida por tal cosa. La cantida minima y maxima de espacios es variable, solo debe pasar como argumento al decorador `len_spaces_range=(3, 5)` donde 3 es e minimo de espacios y 5 es el maximo
@@ -42,9 +41,10 @@ class ClientRules(Rules):
 
         return wrapper
 
-    def end_init_spaces_rule(self, chain):
-        if chain[:1] == " " or chain[-1:] == " ":
-            raise SyntaxError("the chains can not contain spaces in init or end")
+    def invalid_pos_spaces_rule(self, chain):
+        for index in ClientConfig.INVALID_SPACES_INDEX:
+            if chain[index] == " ":
+                raise SyntaxError("the chains can not contain spaces in init or end")
 
     def count_spaces_rule(self, chain):
         if not in_range(
@@ -54,10 +54,12 @@ class ClientRules(Rules):
                 f"the chains should have between {self.len_spaces_range[0]} and {self.len_spaces_range[1]} spaces"
             )
 
-    def consecutive_spaces_rule(self, chain):
+    def min_spaces_distance_rule(self, chain):
         for i in range(len(chain) - 1):
-            if chain[i] == " " and chain[i + 1] == " ":
-                raise SyntaxError("the chains can not contain consecutive spaces.")
+            if chain[i] == " ":
+                for character in chain[i+1:i+ClientConfig.SPACES_MIN_DISTANCE+1]:
+                    if character == " ":
+                        raise SyntaxError("the chains can not contain consecutive spaces.")
 
     def characters_rule(self, chain):
         if not bool(re.match(self.valid_characters, chain)):
