@@ -1,7 +1,10 @@
 import socket
+from config.config import ServerConfig, logging
 
 class Server:
-    def __init__(self, dir = "127.0.0.0", port = 8080, protocol = "TCP/IP" ) -> None:
+    def __init__(
+        self, dir=ServerConfig.DIR, port=ServerConfig.PORT, protocol="TCP/IP"
+    ) -> None:
         self.dir = dir
         self.port = port
         self.protocol = protocol

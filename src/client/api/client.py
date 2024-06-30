@@ -67,6 +67,8 @@ class Client:
                 continue
             if self.send_from_filename():
                 continue
+            
+            logging.info("Client closed")
             break
 
     def create_and_send_chains(self) -> bool:
@@ -78,8 +80,7 @@ class Client:
             self.generate_chains()
             self.send_from_chains()
             return True
-        else:
-            return False
+        return False
 
     def new_chains(self, filename=ChainsConfig.DEFAULT_NAME):
         self.chains = Chains(name=filename, path=self.base_files_path)
@@ -118,6 +119,8 @@ class Client:
 
             filepath = os.path.sep.join([self.base_files_path, filename])
             self.send(filepath=filepath)
+            return True
+        return False
 
     def send(self, filepath):
         if not os.path.exists(filepath):
