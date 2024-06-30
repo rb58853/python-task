@@ -1,7 +1,6 @@
 from server.rules import ServerRules
 import logging
 
-
 class Chains:
     def __init__(self) -> None:
         self.chains = []
@@ -17,6 +16,6 @@ class Chains:
     def calculate_metric(self, chain):
         pass
 
-    def get_chains(self, chains):
+    def get_chains(self, chains, lenght=None):
         for chain in chains:
             self.metric_chain(chain)

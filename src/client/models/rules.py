@@ -3,6 +3,7 @@ import logging
 import re
 from utils.utils import in_range
 from models.rules import Rules
+from client.config.config import ClientConfig
 
 
 class ClientRules(Rules):
@@ -13,15 +14,15 @@ class ClientRules(Rules):
 
     def __init__(
         self,
-        len_spaces_range=(3, 5),
-        valid_characters=r"^[a-zA-Z0-9 ]+$",
-        len_chain_range=(50, 100),
+        len_spaces_range=ClientConfig.SPACES_RANGE,
+        valid_characters=ClientConfig.VALID_CHARACTERS,
+        len_chain_range=ClientConfig.CHAIN_RANGE,
     ):
         self.len_spaces_range = len_spaces_range
         self.valid_characters = valid_characters
         self.len_chain_range = len_chain_range
         self.not_rules = ["__call__", "__init__"]
-         
+
     def __call__(self, func):
         def wrapper(*args, **kwargs):
             chains_self = args[0]
@@ -38,6 +39,7 @@ class ClientRules(Rules):
                         is_valid = False
 
             return func(self=chains_self, chain=(is_valid, chain))
+
         return wrapper
 
     def end_init_spaces_rule(self, chain):
