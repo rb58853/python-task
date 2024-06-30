@@ -63,6 +63,7 @@ class Chains:
     ) -> None:
         self.chains = []
         self.basepath = path
+        self.name = name
         self.fullpath = os.path.sep.join([path, name + ".txt"])
 
     @ClientRules()

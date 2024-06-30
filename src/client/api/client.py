@@ -2,6 +2,7 @@ import socket
 from models.chain import Chains
 from config.config import ChainsConfig, ClientConfig
 from utils.clear_console import clear_console
+import os
 
 
 class ConsoleInputs:
@@ -48,26 +49,37 @@ class Client:
         server_dir=ClientConfig.DIR,
         server_port=ClientConfig.PORT,
         base_files_path=ClientConfig.BASE_DATA_PATH,
+        protocol="TCP/IP",
     ) -> None:
         self.server_dir = server_dir
         self.server_port = server_port
         self.base_files_path = base_files_path
         self.chains: Chains = self.new_chains()
+        self.protocol = "TCP/IP"
 
     def start(self):
         clear_console()
         while True:
-            if not ConsoleInputs.checking("Desea crear una nueva lista de cadenas"):
-                break
-            name = ConsoleInputs.chains_name()
-            name = name if name != "" else ChainsConfig.DEFAULT_NAME
+            if self.create_and_send_chains():
+                continue
 
-            self.new_chains(filename=name)
-            print(f"Tu archivo llamara {name}.txt")
+            break
+
+    def create_and_send_chains(self) -> bool:
+        if ConsoleInputs.checking(
+            "Desea crear una nueva lista de cadenas y enviarla al servidor"
+        ):
+            name = ConsoleInputs.chains_name()
+            self.new_chains(name if name != "" else ChainsConfig.DEFAULT_NAME)
             self.generate_chains()
+            self.send_from_chains()
+            return True
+        else:
+            return False
 
     def new_chains(self, filename=ChainsConfig.DEFAULT_NAME):
         self.chains = Chains(name=filename, path=self.base_files_path)
+        print(f"Tu archivo llamara {filename}.txt")
         return self.chains
 
     def generate_chains(self):
@@ -81,10 +93,21 @@ class Client:
 
         return self.chains
 
-    def send(self):
-        self.chains.to_file()
-        filepath = self.chains.fullpath
+    def send_from_chains(self):
+        if ConsoleInputs.checking(
+            f"Desea crear y enviar el archivo {self.chains.name} al servidor"
+        ):
+            self.chains.to_file()
+            self.send(self.chains.fullpath)
 
+    def send_from_filename(self, filename: str):
+        """
+        Aqui hay que pasar la extension oligado al filename
+        """
+        filepath = os.path.sep.join([self.base_files_path, filename])
+        self.send(filepath=filepath)
+
+    def send(self, filepath):
         count = ConsoleInputs.chains_count()
         if count == "auto" or count == "a":
             with open(filepath, "rb") as f:
@@ -94,17 +117,20 @@ class Client:
             count = int(count)
         except:
             count = None
-
         if count:
             print(f"La cantidad de cadenas que se pasara por parametros es {count}")
         else:
             print(f"No se pasara el numero de cadenas por parametros al servidor")
-
         self.send_file(filepath, count)
 
     def send_file(self, filepath, count=None):
         # Crear un socket TCP/IP
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        if self.protocol == "TCP/IP":
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        else:
+            raise NotImplementedError(
+                "No existe implementacion para un protocolo distinto a 'TCP/IP'"
+            )
 
         # Conectar al servidor
         server_address = (self.server_dir, self.server_port)
