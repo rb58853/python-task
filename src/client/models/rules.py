@@ -1,8 +1,8 @@
 import inspect
-import logging
 import re
 from utils.utils import in_range
-from config.config import ChainsConfig
+from config.config import ChainsConfig, logging
+
 
 class ClientRules:
     """
@@ -36,7 +36,11 @@ class ClientRules:
                         logging.error(f"{type(e).__name__}: {e} Chain: '{chain}'.")
                         is_valid = False
 
-            return func(self=chains_self, chain=(is_valid, chain))
+            if not is_valid:
+                logging.warning(f"The chain '{chain}' was not append")
+                chain = None
+
+            return func(self=chains_self, chain=chain)
 
         return wrapper
 
@@ -56,9 +60,13 @@ class ClientRules:
     def min_spaces_distance_rule(self, chain):
         for i in range(len(chain) - 1):
             if chain[i] == " ":
-                for character in chain[i+1:i+ChainsConfig.SPACES_MIN_DISTANCE+1]:
+                for character in chain[
+                    i + 1 : i + ChainsConfig.SPACES_MIN_DISTANCE + 1
+                ]:
                     if character == " ":
-                        raise SyntaxError("the chains can not contain consecutive spaces.")
+                        raise SyntaxError(
+                            "the chains can not contain consecutive spaces."
+                        )
 
     def characters_rule(self, chain):
         if not bool(re.match(self.valid_characters, chain)):

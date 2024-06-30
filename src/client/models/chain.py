@@ -1,6 +1,5 @@
 from models.rules import ClientRules
-from config.config import ChainsConfig, ClientConfig
-import logging
+from config.config import ChainsConfig, ClientConfig, logging
 import random
 import time
 import os
@@ -67,12 +66,11 @@ class Chains:
         self.fullpath = os.path.sep.join([path, name + ChainsConfig.EXT])
 
     @ClientRules()
-    def append(self, chain):
-        if chain[0]:
-            self.append(chain[1])
-            logging.info(f"The chain '{chain[1]}' was append")
-        else:
-            logging.warning(f"The chain '{chain[1]}' was not append")
+    def append(self, chain, log=True):
+        if chain:
+            self.fast_append(chain)
+            if log:
+                logging.info(f"The chain '{chain}' was append")
 
     def append_autogenerate_chain(self):
         chain = ChainGenerate.generate()
@@ -87,7 +85,7 @@ class Chains:
             self.append_autogenerate_chain()
 
         duration = time.time() - init_time
-        logging.warning(f"append {n} chains in {duration}s")
+        logging.info(f"append {n} chains in {duration}s")
 
     def to_file(self):
         if not os.path.exists(self.basepath):

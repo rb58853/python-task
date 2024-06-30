@@ -1,45 +1,46 @@
 import socket
 from models.chain import Chains
-from config.config import ChainsConfig, ClientConfig
+from config.config import ChainsConfig, ClientConfig, logging
 from utils.clear_console import clear_console
 import os
-import logging
 import codecs
 
 
 class ConsoleInputs:
-    def solicite_int():
+    def solicite_int(message="Ingrese un número entero: "):
         while True:
             try:
-                number = input("Ingrese un número entero: ")
+                number = input(f"> {message}")
                 number = 0 if number == "" else int(number)
                 return number
             except ValueError:
-                print("No es un número entero válido. Intente nuevamente.")
+                print(
+                    f"< '{number}' No es un número entero válido. Intente nuevamente."
+                )
 
     def set_chain():
-        confirm = input("desea agregar una cadena manual (y/any)? ")
+        confirm = input("> Desea agregar una cadena manual (y/any)? ")
         if confirm != "y" and confirm != "yes":
             return None
 
-        chain = input("Ingrese la cadena: ")
+        chain = input("> Escriba la cadena: ")
         return chain
 
     def set_name():
         name = input(
-            "Entra en nombre de tu archivo, no escriba nada y presiona enter si quiere usar el nombre default: "
+            "> Entra en nombre de tu archivo, no escriba nada y presiona enter si quiere usar el nombre default: "
         )
         return name if name != "" else None
 
     def chains_count():
         count = input(
-            "ingresa la cantidad de cadenas que tendra tu archivo de cadenas. Si desea calcular automatico escriba 'a' o 'auto'. Si no escribe un numero o ('auto'/'a') entonces se asume que no quiere especificar la cantidad de cadenas, por ejemplo presionando <enter>: "
+            "> ingresa la cantidad de cadenas que tendra tu archivo de cadenas. Si desea calcular automatico escriba 'a' o 'auto'. Si no escribe un numero o ('auto'/'a') entonces se asume que no quiere especificar la cantidad de cadenas, por ejemplo presionando <enter>: "
         )
         return count
 
     def checking(message: str = None):
         if message:
-            check = input(f"{message} (y/any): ")
+            check = input(f"> {message} (y/any)? ")
             return True if check == "y" or check == "yes" else False
         else:
             raise ValueError("message debe tener algun valor")
@@ -82,11 +83,13 @@ class Client:
 
     def new_chains(self, filename=ChainsConfig.DEFAULT_NAME):
         self.chains = Chains(name=filename, path=self.base_files_path)
-        print(f"Tu archivo llamara {filename}{ChainsConfig.EXT}")
+        print(f"< Tu archivo llamara {filename}{ChainsConfig.EXT}")
         return self.chains
 
     def generate_chains(self):
-        chains_to_autogenerate = ConsoleInputs.solicite_int()
+        chains_to_autogenerate = ConsoleInputs.solicite_int(
+            "Cuantas cadena desea agregar? "
+        )
         self.chains.generate_n_chains(chains_to_autogenerate)
 
         manual_chain = ConsoleInputs.set_chain()
@@ -131,9 +134,9 @@ class Client:
         except:
             count = None
         if count:
-            print(f"La cantidad de cadenas que se pasara por parametros es {count}")
+            print(f"< La cantidad de cadenas que se pasara por parametros es {count}")
         else:
-            print(f"No se pasara el numero de cadenas por parametros al servidor")
+            print(f"< No se pasara el numero de cadenas por parametros al servidor")
         self.send_file(filepath, count)
 
     def send_file(self, filepath, count=None):
