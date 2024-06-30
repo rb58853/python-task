@@ -1,6 +1,11 @@
 class ClientConfig:
     SPACES_RANGE = (3, 5)
-    VALID_CHARACTERS = r"^[a-zA-Z0-9 ]+$"
-    CHAIN_RANGE = (50, 100)
+    INVALID_SPACES_INDEX = [0, -1]
 
+    VALID_CHARACTERS = r"^[a-zA-Z0-9 ]+$"
+    CHOISED_CHARACTERS = (
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    )
+
+    CHAIN_RANGE = (50, 100)
     CHAINS_COUNT = 1000000
