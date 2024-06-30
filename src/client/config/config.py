@@ -1,7 +1,9 @@
 import os
 
+
 class ChainsConfig:
     DEFAULT_NAME = "chains"
+    EXT = ".txt"
 
     SPACES_RANGE = (3, 5)
     INVALID_SPACES_INDEX = [0, -1]
@@ -20,5 +22,5 @@ class ChainsConfig:
 
 class ClientConfig:
     BASE_DATA_PATH = os.path.sep.join([os.getcwd(), "data", "client", "chains"])
-    DIR = '127.0.0.1'
-    PORT = '8080'
+    DIR = "127.0.0.1"
+    PORT: int = 8080

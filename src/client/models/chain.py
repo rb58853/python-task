@@ -64,7 +64,7 @@ class Chains:
         self.chains = []
         self.basepath = path
         self.name = name
-        self.fullpath = os.path.sep.join([path, name + ".txt"])
+        self.fullpath = os.path.sep.join([path, name + ChainsConfig.EXT])
 
     @ClientRules()
     def append(self, chain):

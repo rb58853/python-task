@@ -3,6 +3,8 @@ from models.chain import Chains
 from config.config import ChainsConfig, ClientConfig
 from utils.clear_console import clear_console
 import os
+import logging
+import codecs
 
 
 class ConsoleInputs:
@@ -23,15 +25,15 @@ class ConsoleInputs:
         chain = input("Ingrese la cadena: ")
         return chain
 
-    def chains_name():
+    def set_name():
         name = input(
             "Entra en nombre de tu archivo, no escriba nada y presiona enter si quiere usar el nombre default: "
         )
-        return name
+        return name if name != "" else None
 
     def chains_count():
         count = input(
-            "ingresa la cantidad de cadenas que tendra tu archivo de cadenas. Si desea calcular automatico escriba 'a' o 'auto'. Si no escribe un numero o ('auto'/'a') entonces se asume que no quiere especificar la cantidad de cadenas, por ejemplo presionando <enter>."
+            "ingresa la cantidad de cadenas que tendra tu archivo de cadenas. Si desea calcular automatico escriba 'a' o 'auto'. Si no escribe un numero o ('auto'/'a') entonces se asume que no quiere especificar la cantidad de cadenas, por ejemplo presionando <enter>: "
         )
         return count
 
@@ -47,7 +49,7 @@ class Client:
     def __init__(
         self,
         server_dir=ClientConfig.DIR,
-        server_port=ClientConfig.PORT,
+        server_port: int = ClientConfig.PORT,
         base_files_path=ClientConfig.BASE_DATA_PATH,
         protocol="TCP/IP",
     ) -> None:
@@ -62,15 +64,16 @@ class Client:
         while True:
             if self.create_and_send_chains():
                 continue
-
+            if self.send_from_filename():
+                continue
             break
 
     def create_and_send_chains(self) -> bool:
         if ConsoleInputs.checking(
             "Desea crear una nueva lista de cadenas y enviarla al servidor"
         ):
-            name = ConsoleInputs.chains_name()
-            self.new_chains(name if name != "" else ChainsConfig.DEFAULT_NAME)
+            name = ConsoleInputs.set_name()
+            self.new_chains(name if name else ChainsConfig.DEFAULT_NAME)
             self.generate_chains()
             self.send_from_chains()
             return True
@@ -79,7 +82,7 @@ class Client:
 
     def new_chains(self, filename=ChainsConfig.DEFAULT_NAME):
         self.chains = Chains(name=filename, path=self.base_files_path)
-        print(f"Tu archivo llamara {filename}.txt")
+        print(f"Tu archivo llamara {filename}{ChainsConfig.EXT}")
         return self.chains
 
     def generate_chains(self):
@@ -100,19 +103,29 @@ class Client:
             self.chains.to_file()
             self.send(self.chains.fullpath)
 
-    def send_from_filename(self, filename: str):
-        """
-        Aqui hay que pasar la extension oligado al filename
-        """
-        filepath = os.path.sep.join([self.base_files_path, filename])
-        self.send(filepath=filepath)
+    def send_from_filename(self):
+        if ConsoleInputs.checking(
+            f"Desea enviar un archivo existente al servidor. El archivo debe estar en la direccion '{self.base_files_path}' y solo puede ser archivos con la extension '{ChainsConfig.EXT}'"
+        ):
+
+            name = ConsoleInputs.set_name()
+            filename = name if name else ChainsConfig.DEFAULT_NAME
+            if filename[-(len(ChainsConfig.EXT)) :] != ChainsConfig.EXT:
+                filename += ChainsConfig.EXT
+
+            filepath = os.path.sep.join([self.base_files_path, filename])
+            self.send(filepath=filepath)
 
     def send(self, filepath):
+        if not os.path.exists(filepath):
+            logging.error(f"El archivo {filepath} no existe")
+            return
+
         count = ConsoleInputs.chains_count()
         if count == "auto" or count == "a":
             with open(filepath, "rb") as f:
-                file_data = f.read()
-                count = file_data.count("\n")
+                file_data = codecs.decode(f.read(), "utf-8")
+                count = file_data.count("\n") + 1
         try:
             count = int(count)
         except:
