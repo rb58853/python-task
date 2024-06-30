@@ -1,4 +1,4 @@
-class ClientConfig:
+class ChainsConfig:
     SPACES_RANGE = (3, 5)
     INVALID_SPACES_INDEX = [0, -1]
     SPACES_MIN_DISTANCE = 1 #Valor 1 es equivalente a que no pueden haber espacios consecutivos

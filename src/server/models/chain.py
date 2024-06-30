@@ -1,4 +1,4 @@
-from server.rules import ServerRules
+from server.models.rules import ServerRules
 import logging
 
 class Chains:

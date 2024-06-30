@@ -2,8 +2,7 @@ import inspect
 import logging
 import re
 from utils.utils import in_range
-from client.config.config import ClientConfig
-
+from config.config import ChainsConfig
 
 class ClientRules:
     """
@@ -13,9 +12,9 @@ class ClientRules:
 
     def __init__(
         self,
-        len_spaces_range=ClientConfig.SPACES_RANGE,
-        valid_characters=ClientConfig.VALID_CHARACTERS,
-        len_chain_range=ClientConfig.CHAIN_RANGE,
+        len_spaces_range=ChainsConfig.SPACES_RANGE,
+        valid_characters=ChainsConfig.VALID_CHARACTERS,
+        len_chain_range=ChainsConfig.CHAIN_RANGE,
     ):
         self.len_spaces_range = len_spaces_range
         self.valid_characters = valid_characters
@@ -42,7 +41,7 @@ class ClientRules:
         return wrapper
 
     def invalid_pos_spaces_rule(self, chain):
-        for index in ClientConfig.INVALID_SPACES_INDEX:
+        for index in ChainsConfig.INVALID_SPACES_INDEX:
             if chain[index] == " ":
                 raise SyntaxError("the chains can not contain spaces in init or end")
 
@@ -57,7 +56,7 @@ class ClientRules:
     def min_spaces_distance_rule(self, chain):
         for i in range(len(chain) - 1):
             if chain[i] == " ":
-                for character in chain[i+1:i+ClientConfig.SPACES_MIN_DISTANCE+1]:
+                for character in chain[i+1:i+ChainsConfig.SPACES_MIN_DISTANCE+1]:
                     if character == " ":
                         raise SyntaxError("the chains can not contain consecutive spaces.")
 
