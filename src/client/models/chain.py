@@ -1,9 +1,11 @@
 from models.rules import ClientRules
-from config.config import ChainsConfig
+from config.config import ChainsConfig, ClientConfig
 import logging
 import random
 import time
+import os
 from tqdm import tqdm
+
 
 class ChainGenerate:
     def random_numbers_and_letters_chain():
@@ -45,7 +47,7 @@ class ChainGenerate:
                     includes.remove(invalid_index)
             ##########################
 
-        return chain if chain.count(" ") > ChainsConfig.SPACES_RANGE[0] else None
+        return chain if chain.count(" ") >= ChainsConfig.SPACES_RANGE[0] else None
 
     def generate():
         chain = ChainGenerate.random_numbers_and_letters_chain()
@@ -54,13 +56,19 @@ class ChainGenerate:
 
 
 class Chains:
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        name: str = ChainsConfig.DEFAULT_NAME,
+        path: str = ClientConfig.BASE_DATA_PATH,
+    ) -> None:
         self.chains = []
+        self.basepath = path
+        self.fullpath = os.path.sep.join([path, name + ".txt"])
 
     @ClientRules()
     def append(self, chain):
         if chain[0]:
-            self.fast_append(chain[1])
+            self.append(chain[1])
             logging.info(f"The chain '{chain[1]}' was append")
         else:
             logging.warning(f"The chain '{chain[1]}' was not append")
@@ -68,7 +76,9 @@ class Chains:
     def append_autogenerate_chain(self):
         chain = ChainGenerate.generate()
         if chain:
-            self.append(chain)
+            self.fast_append(chain)
+        else:
+            logging.warning(f"The chain '{chain}' was not append")
 
     def generate_n_chains(self, n=ChainsConfig.CHAINS_COUNT):
         init_time = time.time()
@@ -79,7 +89,13 @@ class Chains:
         logging.warning(f"append {n} chains in {duration}s")
 
     def to_file(self):
-        return self.chains
+        if not os.path.exists(self.basepath):
+            os.makedirs(self.basepath)
+
+        with open(self.fullpath, "w") as file:
+            file.write(str(self))
+            file.close()
+        return self.fullpath
 
     def send(self, chains_count=None):
         pass
