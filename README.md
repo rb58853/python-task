@@ -21,7 +21,7 @@ The main objective of this project is to develop a client-server application usi
 
 # Run app
 ## Run Server
-To start the server, open a terminal at the location of this file (README.md). First, navigate to the server directory by typing the following bash command: 
+To start the server, open a terminal at the root project location. First, navigate to the server directory by typing the following bash command: 
 
     cd src/server
 
@@ -40,7 +40,7 @@ Start the server with a single bash:
 
 
 ## Run Client
-To start the server, open a terminal at the location of this file (README.md). First, navigate to the server directory by typing the following bash command: 
+To start the client, open a terminal at the root project location. First, navigate to the server directory by typing the following bash command: 
 
     cd src/client
 
