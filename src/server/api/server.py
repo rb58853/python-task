@@ -1,6 +1,8 @@
 import socket
 from config.config import ServerConfig, logging
+from models.chain import Chains
 import json
+
 
 class Server:
     def __init__(
@@ -37,7 +39,15 @@ class Server:
                     file_data += data
 
                 data = json.loads(file_data.decode("utf-8"))
-                print(f"Archivo recibido correctamente.")
+                logging.info(f"Archivo {data['name']} recibido correctamente.")
+
+                response = self.process_chain(data).encode("utf-8")
+                connection.sendall(response)
 
             finally:
                 connection.close()
+
+    def process_chain(self, data):
+        chains = Chains(name=data["name"], chains=data["chains"].split("\n"))
+        chains.evaluate_all_chains()
+        return {"name": chains.name, "content": str(chains)}

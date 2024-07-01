@@ -32,10 +32,13 @@ class ChainsConfig:
     )
 
     CHAIN_RANGE = (50, 100)
-    CHAINS_COUNT = 1000000
+    CHAINS_DEFAULT_COUNT = 1000000
 
 
 class ClientConfig:
     BASE_DATA_PATH = os.path.sep.join([base_path, "data", "client", "chains"])
+    BASE_RESPONSE_DATA_PATH = os.path.sep.join(
+        [base_path, "data", "client", "responses"]
+    )
     DIR = "127.0.0.1"
     PORT: int = 8080

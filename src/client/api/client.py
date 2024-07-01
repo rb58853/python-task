@@ -12,7 +12,7 @@ class ConsoleInputs:
         while True:
             try:
                 number = input(f"> {message}")
-                number = 0 if number == "" else int(number)
+                number = None if number == "" else int(number)
                 return number
             except ValueError:
                 print(
@@ -32,12 +32,6 @@ class ConsoleInputs:
             "> Entra el nombre de tu archivo, no escriba nada y presiona enter si quiere usar el nombre default: "
         )
         return name if name != "" else None
-
-    def chains_count():
-        count = input(
-            "> ingresa la cantidad de cadenas que posee tu archivo. Si desea calcular automatico escriba 'a' o 'auto'. Si no escribe un numero o ('auto'/'a') entonces la cantidad de cadenas sera indefinida: "
-        )
-        return count
 
     def checking(message: str = None):
         if message:
@@ -92,7 +86,10 @@ class Client:
         chains_to_autogenerate = ConsoleInputs.solicite_int(
             "Cuantas cadena desea agregar? "
         )
-        self.chains.generate_n_chains(chains_to_autogenerate)
+        if chains_to_autogenerate:
+            self.chains.generate_n_chains(chains_to_autogenerate)
+        else:
+            self.chains.generate_n_chains()
 
         manual_chain = ConsoleInputs.set_chain()
         while manual_chain:
@@ -127,29 +124,10 @@ class Client:
             logging.error(f"El archivo {filepath} no existe")
             return False
 
-        count = ConsoleInputs.chains_count()
-        if count == "auto" or count == "a":
-            with open(filepath, "rb") as f:
-                file_data = codecs.decode(f.read(), "utf-8")
-                count = file_data.count("\n") + 1
-        try:
-            count = int(count)
-        except:
-            count = None
-
-        if count:
-            logging.info(
-                f"La cantidad de cadenas que se pasara por parametros es {count}"
-            )
-        else:
-            logging.warning(
-                f"No se pasara el numero de cadenas por parametros al servidor"
-            )
-
-        self.send_file(filepath, count)
+        self.send_file(filepath)
         return True
 
-    def send_file(self, filepath, count=None):
+    def send_file(self, filepath):
         # Crear un socket TCP/IP
         if self.protocol == "TCP/IP":
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -169,12 +147,30 @@ class Client:
 
             data = {}
             data["filename"] = filepath.split(os.path.sep)[-1]
-            data["count"] = count
             data["file_content"] = file_data
             data = json.dumps(data).encode("utf-8")
             sock.sendall(data)
+
             logging.info("Archivo enviado correctamente.")
+
+            response_data = b""
+            while True:
+                data = sock.recv(4096)
+                if not data:
+                    break
+                response_data += data
+            logging.info("Respuesta recibida correctamente.")
+            self.create_response_file()
         except:
             logging.error("Archivo no enviado.")
         finally:
             sock.close()
+
+    def create_response_file(data, dirpath=ClientConfig.BASE_RESPONSE_DATA_PATH):
+        data = json.loads(data.decode("utf-8"))
+        filename = data["name"]
+        data = data["content"]
+        filepath = os.path.sep.join([dirpath, filename])
+        with open(filepath, "w") as file:
+            file.write(data)
+        return filepath

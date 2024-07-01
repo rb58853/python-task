@@ -79,7 +79,7 @@ class Chains:
         else:
             logging.warning(f"The chain '{chain}' was not append")
 
-    def generate_n_chains(self, n=ChainsConfig.CHAINS_COUNT):
+    def generate_n_chains(self, n=ChainsConfig.CHAINS_DEFAULT_COUNT):
         init_time = time.time()
         for _ in tqdm(range(n), desc="Generating chains", ncols=100):
             self.append_autogenerate_chain()

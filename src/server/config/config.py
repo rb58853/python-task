@@ -17,11 +17,8 @@ base_path = (
 
 
 class ChainsConfig:
-    DEFAULT_NAME = "chains"
-    EXT = ".txt"
-
     INVALIDS_SUBCHAIN = ["aa"]
-
+    NUMBERS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 class ServerConfig:
     BASE_DATA_PATH = os.path.sep.join([os.getcwd(), "data", "server", "chains"])
