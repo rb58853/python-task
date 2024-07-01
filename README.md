@@ -26,6 +26,6 @@ Then, to run the client with the default parameters (`port = 8080`, `dir = '127.
     ```
 Additionally, you can pass the port and address it wishes to use with the commands.    
     ```
-    python3 main.py --port 8080 --dir 127.0.0.1
+    python3 main.py --port 8080 --dir 127.0.0.1 --filespath path/to/folder/for/files --responsespath path/to/folder/for/responses
     ```
 
