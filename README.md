@@ -15,7 +15,6 @@ The main objective of this project is to develop a client-server application usi
 - Python: Programming language used for both client and server development.
 - Sockets: Built-in Python library for handling network connections and communications between client and server.
 ## Main Features
-- Scalability: Designed to support a large number of simultaneous clients without significantly affecting performance.
 - Extensibility: Allows easy addition of new features or modification of existing ones.
 - Efficiency: Optimized to minimize resource usage and maximize processing speed.
 
