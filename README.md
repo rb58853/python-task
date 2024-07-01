@@ -29,9 +29,7 @@ To start the server, open a terminal at the location of this file (README.md). F
 
 Then, to run the server with the default parameters (`port = 8080`, `dir = '127.0.0.1'`), execute the following bash command:    
 
-    ```
-        python3 main.py
-    ```
+    ```python3 main.py```
 
 Additionally, you can pass the port and address it wishes to use with the commands.    
 
