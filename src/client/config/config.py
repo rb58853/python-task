@@ -17,28 +17,46 @@ base_path = (
 
 
 class ChainsConfig:
+    # Default name for chains file
     DEFAULT_NAME = "chains"
+
+    # Extension for chains file
     EXT = ".txt"
 
+    # Range for spaces count in a chain
     SPACES_RANGE = (3, 5)
-    INVALID_SPACES_INDEX = [0, -1]
-    SPACES_MIN_DISTANCE = (
-        1  # Valor 1 es equivalente a que no pueden haber espacios consecutivos
-    )
 
+    # Invalid positions for a space in a chain
+    INVALID_SPACES_INDEX = [0, -1]
+
+    # Min distance between spaces in a chain
+    SPACES_MIN_DISTANCE = 1
+
+    # Regular expression for valid characters in a chain
     VALID_CHARACTERS = r"^[a-zA-Z0-9 ]+$"
+
+    # Characters that can be selected to form the chain
     CHOISED_CHARACTERS = (
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     )
 
+    # Range of the lenght that a chain must have
     CHAIN_RANGE = (50, 100)
+
+    # Default number of chains to create
     CHAINS_DEFAULT_COUNT = 1000000
 
-
 class ClientConfig:
+    #Path to dir data for create chains
     BASE_DATA_PATH = os.path.sep.join([base_path, "data", "client", "chains"])
+    
+    #Path to dir data for create server response file
     BASE_RESPONSE_DATA_PATH = os.path.sep.join(
         [base_path, "data", "client", "responses"]
     )
+
+    #Dir socket to connect
     DIR = "127.0.0.1"
+
+    #Port socket to connect
     PORT: int = 8080
