@@ -1,12 +1,25 @@
 import os
 import logging
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+base_path = os.getcwd()
+base_path = (
+    base_path
+    if base_path.split(os.path.sep)[-1] == "python-task"
+    else os.path.sep.join(
+        [
+            dir
+            for dir in base_path.split(os.path.sep)
+            if dir != "src" and dir != "client"
+        ]
+    )
 )
 
 
-class ChainConfig:
+class ChainsConfig:
+    DEFAULT_NAME = "chains"
+    EXT = ".txt"
+
     INVALIDS_SUBCHAIN = ["aa"]
 
 

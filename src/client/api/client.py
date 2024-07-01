@@ -4,6 +4,7 @@ from config.config import ChainsConfig, ClientConfig, logging
 from utils.clear_console import clear_console
 import os
 import codecs
+import json
 
 
 class ConsoleInputs:
@@ -34,7 +35,7 @@ class ConsoleInputs:
 
     def chains_count():
         count = input(
-            "> ingresa la cantidad de cadenas que tendra tu archivo de cadenas. Si desea calcular automatico escriba 'a' o 'auto'. Si no escribe un numero o ('auto'/'a') entonces se asume que no quiere especificar la cantidad de cadenas, por ejemplo presionando <enter>: "
+            "> ingresa la cantidad de cadenas que posee tu archivo. Si desea calcular automatico escriba 'a' o 'auto'. Si no escribe un numero o ('auto'/'a') entonces la cantidad de cadenas sera indefinida: "
         )
         return count
 
@@ -67,7 +68,7 @@ class Client:
                 continue
             if self.send_from_filename():
                 continue
-            
+
             logging.info("Client closed")
             break
 
@@ -101,15 +102,15 @@ class Client:
         return self.chains
 
     def send_from_chains(self):
-        if ConsoleInputs.checking(
-            f"Desea crear y enviar el archivo {self.chains.name} al servidor"
-        ):
-            self.chains.to_file()
-            self.send(self.chains.fullpath)
+        logging.info(
+            f"Se ha creado el archivo {self.chains.name} y sera enviado al servidor"
+        )
+        self.chains.to_file()
+        return self.send(self.chains.fullpath)
 
     def send_from_filename(self):
         if ConsoleInputs.checking(
-            f"Desea enviar un archivo existente al servidor. El archivo debe estar en la direccion '{self.base_files_path}' y solo puede ser archivos con la extension '{ChainsConfig.EXT}'"
+            f"Desea enviar un archivo existente al servidor. El archivo debe estar en la direccion '{self.base_files_path}' y solo puede seleccionar archivos con extension '{ChainsConfig.EXT}'"
         ):
 
             name = ConsoleInputs.set_name()
@@ -118,14 +119,13 @@ class Client:
                 filename += ChainsConfig.EXT
 
             filepath = os.path.sep.join([self.base_files_path, filename])
-            self.send(filepath=filepath)
-            return True
+            return self.send(filepath=filepath)
         return False
 
     def send(self, filepath):
         if not os.path.exists(filepath):
             logging.error(f"El archivo {filepath} no existe")
-            return
+            return False
 
         count = ConsoleInputs.chains_count()
         if count == "auto" or count == "a":
@@ -136,11 +136,18 @@ class Client:
             count = int(count)
         except:
             count = None
+
         if count:
-            print(f"< La cantidad de cadenas que se pasara por parametros es {count}")
+            logging.info(
+                f"La cantidad de cadenas que se pasara por parametros es {count}"
+            )
         else:
-            print(f"< No se pasara el numero de cadenas por parametros al servidor")
+            logging.warning(
+                f"No se pasara el numero de cadenas por parametros al servidor"
+            )
+
         self.send_file(filepath, count)
+        return True
 
     def send_file(self, filepath, count=None):
         # Crear un socket TCP/IP
@@ -153,23 +160,21 @@ class Client:
 
         # Conectar al servidor
         server_address = (self.server_dir, self.server_port)
-        print(f"Conectándose a {server_address}")
+        logging.info(f"Conectándose a {server_address}")
         sock.connect(server_address)
 
         try:
-            # Enviar el nombre del archivo
-            filename = filepath.split(os.path.sep)[-1]
-            sock.sendall(
-                str(len(filename)).encode("utf-8")
-            )  # Enviar longitud del nombre del archivo
-            sock.sendall(filename.encode("utf-8"))  # Enviar nombre del archivo
-
-            # Leer y enviar el contenido del archivo
             with open(filepath, "rb") as f:
-                file_data = f.read()
-                sock.sendall(file_data)
+                file_data = f.read().decode("utf-8")
 
-            print(f"Archivo {filename} enviado correctamente.")
+            data = {}
+            data["filename"] = filepath.split(os.path.sep)[-1]
+            data["count"] = count
+            data["file_content"] = file_data
+            data = json.dumps(data).encode("utf-8")
+            sock.sendall(data)
+            logging.info("Archivo enviado correctamente.")
+        except:
+            logging.error("Archivo no enviado.")
         finally:
             sock.close()
-            pass

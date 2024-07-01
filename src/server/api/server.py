@@ -1,6 +1,6 @@
 import socket
 from config.config import ServerConfig, logging
-
+import json
 
 class Server:
     def __init__(
@@ -28,11 +28,6 @@ class Server:
             try:
                 print(f"Conexión desde {client_address}")
 
-                # Recibir el nombre del archivo
-                filename_length = int(connection.recv(1024).decode("utf-8"))
-                filename = connection.recv(filename_length).decode("utf-8")
-                print(f"Recibiendo archivo: {filename}")
-
                 # Preparar para recibir datos
                 file_data = b""
                 while True:
@@ -41,9 +36,8 @@ class Server:
                         break
                     file_data += data
 
-                # Guardar el archivo recibido
-                chains_str = file_data.decode("utf-8")
-                print(f"Archivo {filename} recibido correctamente.")
+                data = json.loads(file_data.decode("utf-8"))
+                print(f"Archivo recibido correctamente.")
 
             finally:
                 connection.close()
