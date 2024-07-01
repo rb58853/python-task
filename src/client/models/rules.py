@@ -27,6 +27,7 @@ class ClientRules:
 
     def __call__(self, func):
         def wrapper(*args, **kwargs):
+            # TODO Identify whether the function passed the decorator has a self or not. This is to also pass it to normal functions that are not part of a class.
             chains_self = args[0]
             chain = args[1]
             is_valid = True

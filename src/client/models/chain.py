@@ -7,6 +7,10 @@ from tqdm import tqdm
 
 
 class ChainGenerate:
+    """
+    Class with functions to generate a string according to the specified rules. Use ChainGenerate.generate() to generate a string.
+    """
+
     def random_numbers_and_letters_chain():
         chain_len = random.randint(
             ChainsConfig.CHAIN_RANGE[0], ChainsConfig.CHAIN_RANGE[1]
@@ -21,7 +25,7 @@ class ChainGenerate:
             ChainsConfig.SPACES_RANGE[0], ChainsConfig.SPACES_RANGE[1]
         )
 
-        # Rule invalid index spaces (beging and end)
+        # Rule invalid index spaces
         exclude = [
             (value + len(chain)) % len(chain)
             for value in ChainsConfig.INVALID_SPACES_INDEX
@@ -55,6 +59,15 @@ class ChainGenerate:
 
 
 class Chains:
+    """
+    ## `Chains`
+    Class to generate strings both automatically and manually following each of the rules that the client must use.
+
+    ### inputs
+        - `name`: Name that the given string will have, which is used to name the file where the string is written.
+        - `path`: Address where the file with the given string will be created.
+    """
+
     def __init__(
         self,
         name: str = ChainsConfig.DEFAULT_NAME,
@@ -67,17 +80,24 @@ class Chains:
 
     @ClientRules()
     def append(self, chain, log=True):
+        """
+        ## `append`
+        Add a string analyzing the rules that the client must follow to create a string
+        """
         if chain:
             self.fast_append(chain)
             if log:
-                logging.info(f"The chain '{chain}' was append")
+                logging.info(f"The chain '{chain}' was added")
+
+    def fast_append(self, chain):
+        self.chains.append(chain)
 
     def append_autogenerate_chain(self):
         chain = ChainGenerate.generate()
         if chain:
             self.fast_append(chain)
         else:
-            logging.warning(f"The chain '{chain}' was not append")
+            logging.warning(f"The chain '{chain}' was not added")
 
     def generate_n_chains(self, n=ChainsConfig.CHAINS_DEFAULT_COUNT):
         init_time = time.time()
@@ -96,9 +116,6 @@ class Chains:
             file.close()
         return self.fullpath
 
-    def send(self, chains_count=None):
-        pass
-
     def __str__(self) -> str:
         return "\n".join([chain for chain in self])
 
@@ -107,6 +124,3 @@ class Chains:
 
     def __iter__(self):
         return iter(self.chains)
-
-    def fast_append(self, chain):
-        self.chains.append(chain)

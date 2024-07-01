@@ -3,33 +3,30 @@ from models.chain import Chains
 from config.config import ChainsConfig, ClientConfig, logging
 from utils.clear_console import clear_console
 import os
-import codecs
 import json
 
 
 class ConsoleInputs:
-    def solicite_int(message="Ingrese un número entero: "):
+    def solicite_int(message="Enter an integer: "):
         while True:
             try:
                 number = input(f"> {message}")
                 number = None if number == "" else int(number)
                 return number
             except ValueError:
-                print(
-                    f"< '{number}' No es un número entero válido. Intente nuevamente."
-                )
+                print(f"< '{number}' is not an integer. Try again.")
 
     def set_chain():
-        confirm = input("> Desea agregar una cadena manual (y/any)? ")
+        confirm = input("> Do you want to add a string manually? (y/any)? ")
         if confirm != "y" and confirm != "yes":
             return None
 
-        chain = input("> Escriba la cadena: ")
+        chain = input("> Write the string here: ")
         return chain
 
     def set_name():
         name = input(
-            "> Entra el nombre de tu archivo, no escriba nada y presiona enter si quiere usar el nombre default: "
+            "> Enter the name of your file, just press <enter> if you want to use the default name: "
         )
         return name if name != "" else None
 
@@ -38,24 +35,41 @@ class ConsoleInputs:
             check = input(f"> {message} (y/any)? ")
             return True if check == "y" or check == "yes" else False
         else:
-            raise ValueError("message debe tener algun valor")
+            raise ValueError("message must have any value")
 
 
 class Client:
+    """
+    ## `Client`
+    Client responsible for sending files to the server. It also handles creating and saving strings, as well as storing information received from the server. To start the client, run the `start` function.
+
+    ### inputs
+    - `server_dir`: server address to which it should connect. Default: `ClientConfig.DIR`.
+    - `server_port`: server port number to which it should connect. Default: `ClientConfig.PORT`.
+    - `files_path`: location where generated string files by the client will be saved. Default: `ClientConfig.BASE_DATA_PATH`
+    - `responses_path`: location where server response files will be saved. Default: `ClientConfig.BASE_RESPONSE_DATA_PATH`
+    """
+
     def __init__(
         self,
         server_dir=ClientConfig.DIR,
         server_port: int = ClientConfig.PORT,
-        base_files_path=ClientConfig.BASE_DATA_PATH,
-        protocol="TCP/IP",
+        files_path=ClientConfig.BASE_DATA_PATH,
+        responses_path=ClientConfig.BASE_RESPONSE_DATA_PATH,
     ) -> None:
+
         self.server_dir = server_dir
         self.server_port = server_port
-        self.base_files_path = base_files_path
+        self.base_files_path = files_path
+        self.base_response_data_path = responses_path
+
         self.chains: Chains = self.new_chains()
-        self.protocol = "TCP/IP"
 
     def start(self):
+        """
+        ## `start`
+        Initialize the client and execute a loop to create or send strings to the server.
+        """
         clear_console()
         while True:
             print("\n\n")
@@ -69,7 +83,7 @@ class Client:
 
     def create_and_send_chains(self) -> bool:
         if ConsoleInputs.checking(
-            "Desea crear una nueva lista de cadenas y enviarla al servidor"
+            "Do you want to create a new list of strings and send it to the server?"
         ):
             name = ConsoleInputs.set_name()
             self.new_chains(name if name else ChainsConfig.DEFAULT_NAME)
@@ -80,12 +94,12 @@ class Client:
 
     def new_chains(self, filename=ChainsConfig.DEFAULT_NAME):
         self.chains = Chains(name=filename, path=self.base_files_path)
-        print(f"< Tu archivo llamara {filename}{ChainsConfig.EXT}")
+        logging.info(f"Your file will be named {filename}{ChainsConfig.EXT}")
         return self.chains
 
     def generate_chains(self):
         chains_to_autogenerate = ConsoleInputs.solicite_int(
-            "Cuantas cadena desea agregar? "
+            "How many strings would you like to add? "
         )
         if chains_to_autogenerate:
             self.chains.generate_n_chains(chains_to_autogenerate)
@@ -101,14 +115,14 @@ class Client:
 
     def send_from_chains(self):
         logging.info(
-            f"Se ha creado el archivo {self.chains.name} y sera enviado al servidor"
+            f"The file {self.chains.name} has been created and will be sent to the server."
         )
         self.chains.to_file()
         return self.send(self.chains.fullpath)
 
     def send_from_filename(self):
         if ConsoleInputs.checking(
-            f"Desea enviar un archivo existente al servidor. El archivo debe estar en la direccion '{self.base_files_path}' y solo puede seleccionar archivos con extension '{ChainsConfig.EXT}'"
+            f"Do you want to send an existing file to the server? The file must be located at address '{self.base_files_path}' and can only select files with extension '{ChainsConfig.EXT}'."
         ):
 
             name = ConsoleInputs.set_name()
@@ -122,24 +136,19 @@ class Client:
 
     def send(self, filepath):
         if not os.path.exists(filepath):
-            logging.error(f"El archivo {filepath} no existe")
+            logging.error(f"The file {filepath} does not exist.")
             return False
 
         self.send_file(filepath)
         return True
 
     def send_file(self, filepath):
-        # Crear un socket TCP/IP
-        if self.protocol == "TCP/IP":
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        else:
-            raise NotImplementedError(
-                "No existe implementacion para un protocolo distinto a 'TCP/IP'"
-            )
+        # Creating a TCP/IP socket
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        # Conectar al servidor
+        # connect to server
         server_address = (self.server_dir, self.server_port)
-        logging.info(f"Conectándose a {server_address}")
+        logging.info(f"Connecting to {server_address}")
         sock.connect(server_address)
 
         try:
@@ -155,7 +164,7 @@ class Client:
             end_message = "END".encode()
             sock.sendall(end_message)
 
-            logging.info("Archivo enviado correctamente.")
+            logging.info("File sent successfully.")
 
             response_data = b""
             while True:
@@ -164,20 +173,23 @@ class Client:
                     break
                 response_data += data
 
-            logging.info("Respuesta recibida correctamente.")
             try:
                 logging.info(
-                    f"Archivo creado en {self.create_response_file(response_data)}"
+                    f"A file with the server's response has been created in {self.create_response_file(response_data)}."
                 )
             except:
-                logging.error(f"El archivo no ha sido creado")
+                logging.error(
+                    f"The file with the server's response has not been created."
+                )
 
         except:
-            logging.error("Archivo no enviado.")
+            logging.error("The process did not execute correctly.")
         finally:
             sock.close()
 
-    def create_response_file(self, data, dirpath=ClientConfig.BASE_RESPONSE_DATA_PATH):
+    def create_response_file(self, data):
+        """ """
+        dirpath = self.base_response_data_path
         if not os.path.exists(dirpath):
             os.makedirs(dirpath)
 

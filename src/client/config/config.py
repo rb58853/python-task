@@ -15,7 +15,6 @@ base_path = (
     )
 )
 
-
 class ChainsConfig:
     # Default name for chains file
     DEFAULT_NAME = "chains"
