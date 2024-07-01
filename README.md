@@ -1,6 +1,6 @@
 # Client-Server in Python
 ## Objective
-    The main objective of this project is to develop a client-server application using Python that allows for bidirectional communication between a client and a server. The application is designed to be highly scalable and extendable, following best practices in programming.
+The main objective of this project is to develop a client-server application using Python that allows for bidirectional communication between a client and a server. The application is designed to be highly scalable and extendable, following best practices in programming.
 
 ## General Operation
 ### Client
@@ -22,29 +22,17 @@
 # Run app
 ## Run Server
 To start the server, open a terminal at the location of this file (README.md). First, navigate to the server directory by typing the following bash command: 
-    ``` 
-    cd src/server
-    ```
+    ```cd src/server```
 Then, to run the server with the default parameters (`port = 8080`, `dir = '127.0.0.1'`), execute the following bash command:    
-    ```
-    python3 main.py
-    ```
+    ```python3 main.py```
 Additionally, you can pass the port and address it wishes to use with the commands.    
-    ```
-    python3 main.py --port 8080 --dir 127.0.0.1
-    ```
+    ```python3 main.py --port 8080 --dir 127.0.0.1```
 
 ## Run Client
 To start the server, open a terminal at the location of this file (README.md). First, navigate to the server directory by typing the following bash command: 
-    ``` 
-    cd src/client
-    ```
+    ```cd src/client```
 Then, to run the client with the default parameters (`port = 8080`, `dir = '127.0.0.1'`), execute the following bash command:    
-    ```
-    python3 main.py
-    ```
+    ```python3 main.py```
 Additionally, you can pass the port and address it wishes to use with the commands.    
-    ```
-    python3 main.py --port 8080 --dir 127.0.0.1 --filespath path/to/folder/for/files --responsespath path/to/folder/for/responses
-    ```
+    ```python3 main.py --port 8080 --dir 127.0.0.1 --filespath path/to/folder/for/files --responsespath path/to/folder/for/responses```
 
