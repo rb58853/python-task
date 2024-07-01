@@ -2,8 +2,16 @@ from models.rules import ServerRules
 from config.config import ChainsConfig
 import logging
 
-
 class Chains:
+    """
+    ## `Chains`
+    Receive the file name and its content; process the latter.
+
+    ### Inputs:
+    - `name`: The name of the file received.
+    - `chains`: The content of the file received.
+    """
+
     def __init__(self, name: str, chains) -> None:
         self.name = name
         self.chains = chains
@@ -11,19 +19,23 @@ class Chains:
         self.errors = []
 
     @ServerRules()
-    def eval_chain(self, chain):
+    def eval_chain(self, chain, log=False):
         if chain["state"] == "ok":
             return {
                 "error": None,
                 "metric": self.calculate_metric(chain["chain"]),
             }
         else:
-            logging.error(chain["message"])
+            if log:
+                logging.error(chain["message"])
             return {"error": chain["message"], "metric": chain["metric"]}
 
     def calculate_metric(self, chain):
         numbers_count = 0
         spaces_count = chain.count(" ")
+        if spaces_count == 0:
+            raise Exception("Spaces count must be > 0")
+
         for number in ChainsConfig.NUMBERS:
             numbers_count += chain.count(number)
         letters_count = len(chain) - spaces_count - numbers_count

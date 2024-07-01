@@ -1,11 +1,15 @@
 import inspect
-import logging
+from config.config import ChainsConfig
 
 
 class ServerRules:
     """
+    When using this class as a decorator for a function, it will analyze the passed string to determine if it is valid or not. In case it is not valid according to a given rule, the `state` will be `"error"` and will has a specific metric for this rule.
+    Each of the functions in this class constitutes a rule for the generation of strings by the client. The functions whose names are contained in `self.not_rules` do not constitute a rule.
+
     ### Rules:
-        - `spaces_rule:` Esta regla esta definida por tal cosa. La cantida minima y maxima de espacios es variable, solo debe pasar como argumento al decorador `len_spaces_range=(3, 5)` donde 3 es e minimo de espacios y 5 es el maximo
+    - `invalid_subchain`: Rule that defines all invalid substrings within a string. These substrings can appear in any form, each character being either lowercase or uppercase.
+        - `ChainsConfig.INVALIDS_SUBCHAIN`: Invalid strings that should not be substrings of the main string
     """
 
     def __init__(self):
@@ -27,16 +31,17 @@ class ServerRules:
 
         return wrapper
 
-    def double_a_rule(self, chain):
-        if "aa" in chain.lower():
-            return {
-                "chain": chain,
-                "state": "error",
-                "message": f"Double 'a' rule detected in chain '{chain}'",
-                "metric": 1000,
-            }
-        else:
-            return {
-                "chain": chain,
-                "state": "ok",
-            }
+    def invalid_subchain(self, chain):
+        for subchain in ChainsConfig.INVALIDS_SUBCHAIN:
+            if subchain.lower() in chain.lower():
+                return {
+                    "chain": chain,
+                    "state": "error",
+                    "message": f"Invalid substring {subchain.lower()} detected in chain '{chain}'",
+                    "metric": 1000,
+                }
+            else:
+                return {
+                    "chain": chain,
+                    "state": "ok",
+                }
