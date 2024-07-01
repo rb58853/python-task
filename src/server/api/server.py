@@ -1,6 +1,7 @@
 import socket
 from config.config import ServerConfig, logging
 
+
 class Server:
     def __init__(
         self, dir=ServerConfig.DIR, port=ServerConfig.PORT, protocol="TCP/IP"
@@ -41,8 +42,7 @@ class Server:
                     file_data += data
 
                 # Guardar el archivo recibido
-                with open(filename, "wb") as f:
-                    f.write(file_data)
+                chains_str = file_data.decode("utf-8")
                 print(f"Archivo {filename} recibido correctamente.")
 
             finally:

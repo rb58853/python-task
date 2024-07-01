@@ -28,7 +28,7 @@ class ConsoleInputs:
 
     def set_name():
         name = input(
-            "> Entra en nombre de tu archivo, no escriba nada y presiona enter si quiere usar el nombre default: "
+            "> Entra el nombre de tu archivo, no escriba nada y presiona enter si quiere usar el nombre default: "
         )
         return name if name != "" else None
 
@@ -158,7 +158,7 @@ class Client:
 
         try:
             # Enviar el nombre del archivo
-            filename = filepath.split("/")[-1]
+            filename = filepath.split(os.path.sep)[-1]
             sock.sendall(
                 str(len(filename)).encode("utf-8")
             )  # Enviar longitud del nombre del archivo
