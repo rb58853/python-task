@@ -4,9 +4,8 @@ import logging
 
 
 class Chains:
-    def __init__(self, name: str, count, chains) -> None:
+    def __init__(self, name: str, chains) -> None:
         self.name = name
-        self.count = count
         self.chains = chains
         self.metrics = []
         self.errors = []
@@ -31,10 +30,12 @@ class Chains:
         return (letters_count * 1.5 + numbers_count * 2) / spaces_count
 
     def evaluate_all_chains(self):
-        for index, chain in enumerate(self.chains):
-            temp_eval = self.metric_chain(chain)
-            self.errors[index] = temp_eval["error"]
-            self.metrics[index] = temp_eval["metric"]
+        self.errors = []
+        self.metrics = []
+        for chain in self.chains:
+            temp_eval = self.eval_chain(chain)
+            self.errors.append(temp_eval["error"])
+            self.metrics.append(temp_eval["metric"])
 
     def __str__(self) -> str:
         result_str = ""

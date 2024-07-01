@@ -58,6 +58,7 @@ class Client:
     def start(self):
         clear_console()
         while True:
+            print("\n\n")
             if self.create_and_send_chains():
                 continue
             if self.send_from_filename():
@@ -151,6 +152,9 @@ class Client:
             data = json.dumps(data).encode("utf-8")
             sock.sendall(data)
 
+            end_message = "END".encode()
+            sock.sendall(end_message)
+
             logging.info("Archivo enviado correctamente.")
 
             response_data = b""
@@ -159,18 +163,29 @@ class Client:
                 if not data:
                     break
                 response_data += data
+
             logging.info("Respuesta recibida correctamente.")
-            self.create_response_file()
+            try:
+                logging.info(
+                    f"Archivo creado en {self.create_response_file(response_data)}"
+                )
+            except:
+                logging.error(f"El archivo no ha sido creado")
+
         except:
             logging.error("Archivo no enviado.")
         finally:
             sock.close()
 
-    def create_response_file(data, dirpath=ClientConfig.BASE_RESPONSE_DATA_PATH):
+    def create_response_file(self, data, dirpath=ClientConfig.BASE_RESPONSE_DATA_PATH):
+        if not os.path.exists(dirpath):
+            os.makedirs(dirpath)
+
         data = json.loads(data.decode("utf-8"))
         filename = data["name"]
         data = data["content"]
         filepath = os.path.sep.join([dirpath, filename])
+
         with open(filepath, "w") as file:
             file.write(data)
         return filepath

@@ -35,3 +35,8 @@ class ServerRules:
                 "message": f"Double 'a' rule detected in chain '{chain}'",
                 "metric": 1000,
             }
+        else:
+            return {
+                "chain": chain,
+                "state": "ok",
+            }

@@ -36,10 +36,14 @@ class Server:
                     data = connection.recv(4096)
                     if not data:
                         break
+                    if data.decode()[-3:] == "END":
+                        temp = data[:-3]
+                        file_data += data[:-3]
+                        break
                     file_data += data
 
                 data = json.loads(file_data.decode("utf-8"))
-                logging.info(f"Archivo {data['name']} recibido correctamente.")
+                logging.info(f"Archivo {data['filename']} recibido correctamente.")
 
                 response = self.process_chain(data).encode("utf-8")
                 connection.sendall(response)
@@ -48,6 +52,6 @@ class Server:
                 connection.close()
 
     def process_chain(self, data):
-        chains = Chains(name=data["name"], chains=data["chains"].split("\n"))
+        chains = Chains(name=data["filename"], chains=data["file_content"].split("\n"))
         chains.evaluate_all_chains()
-        return {"name": chains.name, "content": str(chains)}
+        return json.dumps({"name": chains.name, "content": str(chains)})
