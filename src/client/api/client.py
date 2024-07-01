@@ -5,38 +5,40 @@ from utils.clear_console import clear_console
 import os
 import json
 from tqdm import tqdm
+import time
 
 """ TODO
 - Create a progress bar for received files. To do this, I must first send the size of the data that will be passed through the socket, so that the receiver can receive it and create a progress bar with this information. Similar to what is done with 'END'.
 """
 
+
 class ConsoleInputs:
     def solicite_int(message="Enter an integer: "):
         while True:
             try:
-                number = input(f"> {message}")
+                number = input(f"{message}")
                 number = None if number == "" else int(number)
                 return number
             except ValueError:
                 print(f"< '{number}' is not an integer. Try again.")
 
     def set_chain():
-        confirm = input("> Do you want to add a string manually? (y/any)? ")
+        confirm = input("❓ Do you want to add a string manually (y/any)? ")
         if confirm != "y" and confirm != "yes":
             return None
 
-        chain = input("> Write the string here: ")
+        chain = input("📝 Write the string here: ")
         return chain
 
     def set_name():
         name = input(
-            "> Enter the name of your file, just press <enter> if you want to use the default name: "
+            "⚙️  Enter the name of your file, just press <enter> if you want to use the default name: "
         )
         return name if name != "" else None
 
     def checking(message: str = None):
         if message:
-            check = input(f"> {message} (y/any)? ")
+            check = input(f"❓ {message} (y/any)? ")
             return True if check == "y" or check == "yes" else False
         else:
             raise ValueError("message must have any value")
@@ -75,7 +77,13 @@ class Client:
         Initialize the client and execute a loop to create or send strings to the server.
         """
         clear_console()
+        print("Welcome to our client application".upper())
+        print(
+            "This application allows you to create and send text strings directly to our server. Simply follow the instructions that appear on the console to get started.\n"
+        )
+
         while True:
+            print("New request".upper())
             if self.create_and_send_chains():
                 print("\n\n")
                 continue
@@ -83,8 +91,8 @@ class Client:
                 print("\n\n")
                 continue
 
-            logging.info("Client closed")
-            break
+            # logging.info("Client closed")
+            # break
 
     def create_and_send_chains(self) -> bool:
         if ConsoleInputs.checking(
@@ -99,22 +107,25 @@ class Client:
 
     def new_chains(self, filename=ChainsConfig.DEFAULT_NAME):
         self.chains = Chains(name=filename, path=self.base_files_path)
-        logging.info(f"Your file will be named {filename}{ChainsConfig.EXT}")
+        print(f"✅ Your file will be named {filename}{ChainsConfig.EXT}\n")
         return self.chains
 
     def generate_chains(self):
         chains_to_autogenerate = ConsoleInputs.solicite_int(
-            "How many strings would you like to add? "
+            "❓ How many strings would you like to add? "
         )
         if chains_to_autogenerate:
             self.chains.generate_n_chains(chains_to_autogenerate)
         else:
             self.chains.generate_n_chains()
 
+        print("\n")
         manual_chain = ConsoleInputs.set_chain()
         while manual_chain:
             self.chains.append(manual_chain)
+            print("\n")
             manual_chain = ConsoleInputs.set_chain()
+        print("\n")
 
         return self.chains
 
@@ -126,6 +137,7 @@ class Client:
         return self.send(self.chains.fullpath)
 
     def send_from_filename(self):
+        print("\n")
         if ConsoleInputs.checking(
             f"Do you want to send an existing file to the server? The file must be located at address '{self.base_files_path}' and can only select files with extension '{ChainsConfig.EXT}'."
         ):
@@ -144,7 +156,9 @@ class Client:
             logging.error(f"The file {filepath} does not exist.")
             return False
 
+        init_time = time.time()
         self.send_file(filepath)
+        logging.info(f"Process completed in {time.time()-init_time} s")
         return True
 
     def send_file(self, filepath):

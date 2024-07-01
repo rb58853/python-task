@@ -8,6 +8,7 @@ from tqdm import tqdm
 - Create a progress bar for received files. To do this, I must first send the size of the data that will be passed through the socket, so that the receiver can receive it and create a progress bar with this information. Similar to what is done with 'END'.
 """
 
+
 class Server:
     def __init__(self, dir=ServerConfig.DIR, port=ServerConfig.PORT) -> None:
         self.dir = dir
@@ -19,14 +20,14 @@ class Server:
 
         # Linking the socket with a specific port
         server_address = (self.dir, self.port)  # IP address and port
-        print(f"Starting server on {server_address}")
+        logging.info(f"Starting server on {server_address}")
         sock.bind(server_address)
 
         # Listening for incoming connections
         sock.listen(1)
 
         while True:
-            print("Waiting connection...")
+            logging.info("Waiting connection...")
             connection, client_address = sock.accept()
             try:
                 print(f"Connection from {client_address}")
@@ -39,7 +40,6 @@ class Server:
                     if not data:
                         break
                     if data.decode()[-3:] == "END":
-                        temp = data[:-3]
                         file_data += data[:-3]
                         break
                     file_data += data
@@ -58,7 +58,6 @@ class Server:
                 )
                 sent_progress_bar.update(bytes_recv)
 
-                # connection.sendall(response)
                 bytes_sent = ServerConfig.bytes_sent
                 while len(response) > 0:
                     connection.sendall(response[:bytes_sent])
