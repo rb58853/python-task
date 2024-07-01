@@ -55,3 +55,7 @@ Start the cient with a single bash:
 
     cd src/client
     python3 main.py
+
+## Install requirements
+
+    pip install -r requirements.txt
