@@ -2,6 +2,11 @@ import socket
 from config.config import ServerConfig, logging
 from models.chain import Chains
 import json
+from tqdm import tqdm
+
+""" TODO
+- Create a progress bar for received files. To do this, I must first send the size of the data that will be passed through the socket, so that the receiver can receive it and create a progress bar with this information. Similar to what is done with 'END'.
+"""
 
 class Server:
     def __init__(self, dir=ServerConfig.DIR, port=ServerConfig.PORT) -> None:
@@ -26,9 +31,11 @@ class Server:
             try:
                 print(f"Connection from {client_address}")
 
+                bytes_recv = ServerConfig.bytes_recv
+
                 file_data = b""
                 while True:
-                    data = connection.recv(4096)
+                    data = connection.recv(bytes_recv)
                     if not data:
                         break
                     if data.decode()[-3:] == "END":
@@ -41,7 +48,23 @@ class Server:
                 logging.info(f"File {data['filename']} received successfully.")
 
                 response = self.process_chain(data).encode("utf-8")
-                connection.sendall(response)
+
+                sent_progress_bar = tqdm(
+                    total=len(response),
+                    desc="Sending response to client",
+                    unit="B",
+                    unit_scale=True,
+                    unit_divisor=1024,
+                )
+                sent_progress_bar.update(bytes_recv)
+
+                # connection.sendall(response)
+                bytes_sent = ServerConfig.bytes_sent
+                while len(response) > 0:
+                    connection.sendall(response[:bytes_sent])
+                    response = response[bytes_sent:]
+                    sent_progress_bar.update(bytes_sent)
+                sent_progress_bar.close()
 
             finally:
                 connection.close()

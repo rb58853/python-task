@@ -1,6 +1,7 @@
 from models.rules import ServerRules
 from config.config import ChainsConfig
 import logging
+from tqdm import tqdm
 
 class Chains:
     """
@@ -44,7 +45,7 @@ class Chains:
     def evaluate_all_chains(self):
         self.errors = []
         self.metrics = []
-        for chain in self.chains:
+        for chain in tqdm(self.chains, desc="Evaluating chains", ncols=100):
             temp_eval = self.eval_chain(chain)
             self.errors.append(temp_eval["error"])
             self.metrics.append(temp_eval["metric"])

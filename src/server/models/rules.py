@@ -37,7 +37,7 @@ class ServerRules:
                 return {
                     "chain": chain,
                     "state": "error",
-                    "message": f"Invalid substring {subchain.lower()} detected in chain '{chain}'",
+                    "message": f"Invalid substring '{subchain.lower()}' detected in chain '{chain}'",
                     "metric": 1000,
                 }
             else:

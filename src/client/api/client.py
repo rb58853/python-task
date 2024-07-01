@@ -4,7 +4,11 @@ from config.config import ChainsConfig, ClientConfig, logging
 from utils.clear_console import clear_console
 import os
 import json
+from tqdm import tqdm
 
+""" TODO
+- Create a progress bar for received files. To do this, I must first send the size of the data that will be passed through the socket, so that the receiver can receive it and create a progress bar with this information. Similar to what is done with 'END'.
+"""
 
 class ConsoleInputs:
     def solicite_int(message="Enter an integer: "):
@@ -72,10 +76,11 @@ class Client:
         """
         clear_console()
         while True:
-            print("\n\n")
             if self.create_and_send_chains():
+                print("\n\n")
                 continue
             if self.send_from_filename():
+                print("\n\n")
                 continue
 
             logging.info("Client closed")
@@ -159,16 +164,33 @@ class Client:
             data["filename"] = filepath.split(os.path.sep)[-1]
             data["file_content"] = file_data
             data = json.dumps(data).encode("utf-8")
-            sock.sendall(data)
+
+            bytes_sent = ClientConfig.bytes_sent
+            progress_bar = tqdm(
+                total=len(data),
+                desc="Sending data to server",
+                unit="B",
+                unit_scale=True,
+                unit_divisor=1024,
+            )
+
+            # send data with progress
+            while len(data) > 0:
+                sock.sendall(data[:bytes_sent])
+                data = data[bytes_sent:]
+                progress_bar.update(bytes_sent)
+
+            progress_bar.close()
 
             end_message = "END".encode()
             sock.sendall(end_message)
-
             logging.info("File sent successfully.")
 
             response_data = b""
+
+            bytes_recv = ClientConfig.bytes_recv
             while True:
-                data = sock.recv(4096)
+                data = sock.recv(bytes_recv)
                 if not data:
                     break
                 response_data += data
@@ -182,8 +204,8 @@ class Client:
                     f"The file with the server's response has not been created."
                 )
 
-        except:
-            logging.error("The process did not execute correctly.")
+        except Exception as e:
+            logging.error(f"The process did not execute correctly: {e}")
         finally:
             sock.close()
 

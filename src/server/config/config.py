@@ -15,3 +15,6 @@ class ServerConfig:
 
     # server port
     PORT: int = 8080
+
+    bytes_recv = 1024*1024
+    bytes_sent = 1024*1024

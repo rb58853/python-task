@@ -15,6 +15,7 @@ base_path = (
     )
 )
 
+
 class ChainsConfig:
     # Default name for chains file
     DEFAULT_NAME = "chains"
@@ -45,17 +46,21 @@ class ChainsConfig:
     # Default number of chains to create
     CHAINS_DEFAULT_COUNT = 1000000
 
+
 class ClientConfig:
-    #Path to dir data for create chains
+    # Path to dir data for create chains
     BASE_DATA_PATH = os.path.sep.join([base_path, "data", "client", "chains"])
-    
-    #Path to dir data for create server response file
+
+    # Path to dir data for create server response file
     BASE_RESPONSE_DATA_PATH = os.path.sep.join(
         [base_path, "data", "client", "responses"]
     )
 
-    #Dir socket to connect
+    # Dir socket to connect
     DIR = "127.0.0.1"
 
-    #Port socket to connect
+    # Port socket to connect
     PORT: int = 8080
+
+    bytes_recv = 1024 * 1024
+    bytes_sent = 1024 * 1024
