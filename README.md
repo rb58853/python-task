@@ -57,5 +57,6 @@ Start the cient with a single bash:
     python3 main.py
 
 ## Install requirements
+Open a terminal at the root project location and write:
 
     pip install -r requirements.txt
